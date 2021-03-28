@@ -1,0 +1,10 @@
+8.jan
+Møte med veileder Rune, der vi diskuterte forskjellige framgangsmåter for prosjektet. Fikk og med meg en del mikrokontrollere og et batteri for å kunne jobbe hjemmefra.
+
+24.feb
+Initialisering av mikroprosessor ESP32 fungerer og kan sende informasjon til server som opprettes på eksisterende nettverk. Prøvde bruke Bluno Beetle v1.1, men for en eller annen grunn fikk jeg den ikke til å fungere ved bluetooth 
+siden den nektet å dukke opp når jeg søkte etter den. Etter feilsøking kom jeg fram til at jeg måtte kanskje ha nye drivere, som krevde en kinesisk brukerkonto så valgte dermed bare å bruke ESP32.
+
+5.mars
+Møte med veileder Rune, der idden for prosjektet har fått en ganske fast form og retning. For en eller annen grunn misforstod jeg hvem som var arbeidsgiver for prosjektet. Trodde det var en mer fri oppgave,
+men Jan har tydeligvis kommando så må godkjenne planen min med han.
