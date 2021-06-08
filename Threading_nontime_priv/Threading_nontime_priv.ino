@@ -1,24 +1,15 @@
 #include <WiFi.h>
 #include <WiFiUdp.h>
+#include "soc/timer_group_struct.h"
+#include "soc/timer_group_reg.h"
 
-//Fill in the network the EPS32 should connect to
 const char * networkName = "***";
 const char * networkPswd = "***";
-
-//Server address for hadling of data
-const char * udpAddress = "165.227.145.19";
-
-//Change port accordingly to name of the sensor. sensorX = port 400X,  ex sensor 7 should have port 4007
+const char * udpAddress = "***";
 const int udpPort = 4001;
-char query[60];
-
-//Set correct inputs used for each compnent used on the EPS32
-int sensor = 2;
-int potmeter = 4;
-
+char query[50];
 boolean connected = false;
 WiFiUDP udp;
-int i = 0;
 
 TaskHandle_t Task1;
 TaskHandle_t Task2;
@@ -59,17 +50,23 @@ void Task1code( void * pvParameters ){
   Serial.print("Task1 running on core ");
   Serial.println(xPortGetCoreID());
   int check = 0;
+  int interval = 99;
+  int samples = 10000000;
 
   for(;;){
     long int start = millis();
+    long int currTime = 0;
     if(check==0){
-    for(int i = 0; i<100000; i++){
-    int num = analogRead(sensor);
-    int pot = analogRead(potmeter);
-    //sends data to stack. If queue is full, the sensor will wait to send information until 
-    //room is available.
-    xQueueSend(Valqueue, &num, portMAX_DELAY);
-    xQueueSend(Potqueue, &pot, portMAX_DELAY);
+    for(int i = 0; i<samples;){
+      if ( micros() >= currTime + interval){
+        currTime = micros();
+        int num = analogRead(34);
+        int pot = analogRead(35);
+        //Serial.println(pot);
+        xQueueSend(Valqueue, &num, portMAX_DELAY);
+        xQueueSend(Potqueue, &pot, portMAX_DELAY);
+        i++;
+      }
     }
     check=1;
     }
@@ -81,27 +78,36 @@ void Task1code( void * pvParameters ){
   } 
 }
 
+
 void Task2code( void * pvParameters ){
   Serial.print("Task2 running on core ");
   Serial.println(xPortGetCoreID());
   int j = 1;
+  int k = 0;
 
   for(;;){
     int val1,pot1,val2,pot2,val3,pot3,val4,pot4,val5,pot5,val6,pot6,val7,pot7,val8,pot8;
     xQueueReceive(Valqueue, &val1, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot1, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val2, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot2, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val3, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot3, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val4, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot4, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val5, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot5, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val6, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot6, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val7, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot7, portMAX_DELAY);
+    //delayMicroseconds(10);
     xQueueReceive(Valqueue, &val8, portMAX_DELAY);
     xQueueReceive(Potqueue, &pot8, portMAX_DELAY);
 
@@ -112,6 +118,13 @@ void Task2code( void * pvParameters ){
     udp.printf(query);
     udp.endPacket();
     j=j+8;
+    k++;
+    if(k >= 2000){
+    TIMERG0.wdt_wprotect=TIMG_WDT_WKEY_VALUE;
+    TIMERG0.wdt_feed=1;
+    TIMERG0.wdt_wprotect=0;
+    k = 0;
+    }
   }
 }
 
